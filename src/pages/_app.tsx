@@ -1,9 +1,32 @@
 import '../styles/global.css';
+import { AppProps } from 'next/app';
+import Head from 'next/head';
+import { MantineProvider } from '@mantine/core';
+import { UIEarthContextProvider } from '@/context/ui-earth-context-provider';
 
-import type { AppProps } from 'next/app';
+export default function App(props: AppProps) {
+  const { Component, pageProps } = props;
 
-const MyApp = ({ Component, pageProps }: AppProps) => (
-  <Component {...pageProps} />
-);
+  return (
+    <>
+      <Head>
+        <title>Page title</title>
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+      </Head>
 
-export default MyApp;
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          /** Put your mantine theme override here */
+          colorScheme: 'dark',
+        }}
+      >
+        
+        <UIEarthContextProvider>
+          <Component {...pageProps} />
+        </UIEarthContextProvider>
+      </MantineProvider>
+    </>
+  );
+}
