@@ -1,51 +1,22 @@
-import * as THREE from "three";
-import { createRoot } from "react-dom/client";
+import { Html, OrbitControls } from '@react-three/drei';
+import type { HtmlProps } from '@react-three/drei/web/Html';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import type { Ref } from 'react';
 import React, {
-  Suspense,
+  useContext,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  Ref,
-  useMemo,
-  useLayoutEffect,
-} from "react";
-import {
-  Canvas,
-  useFrame,
-  ThreeElements,
-  useLoader,
-  useThree,
-} from "@react-three/fiber";
-import {
-  Camera,
-  Color,
-  Mesh,
-  MeshLambertMaterial,
-  MeshPhongMaterial,
-  MeshPhysicalMaterial,
-  Object3D,
-  SphereGeometry,
-  sRGBEncoding,
-  TextureLoader,
-} from "three";
-import Image from "next/image";
-import {
-  OrbitControls,
-  Stats,
-  Html,
-  Points,
-  PointMaterial,
-  ArcballControls,
-  Float,
-} from "@react-three/drei";
-import { GUI } from "dat.gui";
-import { HtmlProps } from "@react-three/drei/web/Html";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import styles from "../styles/earth.module.scss";
-import { inSphere } from "maath/random";
-import CustomShaderMaterial from "three-custom-shader-material";
-import { useContext } from "react";
-import { UIEarthContext } from "@/context/ui-earth-context";
-import { UIEarthContextProvider } from "@/context/ui-earth-context-provider";
+} from 'react';
+import type { Mesh, Object3D } from 'three';
+import * as THREE from 'three';
+import { MeshPhongMaterial, sRGBEncoding, TextureLoader } from 'three';
+import CustomShaderMaterial from 'three-custom-shader-material';
+
+import { UIEarthContext } from '@/context/ui-earth-context';
+
+import styles from '../styles/earth.module.scss';
 
 // https://codesandbox.io/s/priceless-bohr-xlum2?file=/src/models/Earth.js:158-165
 
@@ -57,13 +28,13 @@ interface IMarker extends HtmlProps {
 function Marker(props: IMarker) {
   // This holds the local occluded state
   const [occluded, occlude] = useState<boolean>();
-  const earthContext = useContext(UIEarthContext)
+  const earthContext = useContext(UIEarthContext);
   // const {camera} = useThree()
 
   const toggleLander = () => {
-    console.log("Lander clicked")
-    earthContext.callbackFuncs.toggleLander()
-  }
+    console.log('Lander clicked');
+    earthContext.callbackFuncs.toggleLander();
+  };
 
   return (
     <Html
@@ -74,11 +45,11 @@ function Marker(props: IMarker) {
       onOcclude={occlude}
       // We just interpolate the visible state into css opacity and transforms
       style={{
-        transition: "all 0.2s",
+        transition: 'all 0.2s',
         opacity: occluded ? 0 : 1,
         transform: `scale(${occluded ? 0.25 : 1})`,
       }}
-      className={"noselect pulsating-circle"}
+      className={'noselect pulsating-circle'}
       {...props}
     >
       <div onClick={toggleLander} className={styles.pulsatingcircle} />
@@ -104,11 +75,11 @@ function MarkerText(props: IMarker) {
       onOcclude={occlude}
       // We just interpolate the visible state into css opacity and transforms
       style={{
-        transition: "all 0.2s",
+        transition: 'all 0.2s',
         opacity: occluded ? 0 : 1,
         transform: `scale(${occluded ? 0.25 : 1})`,
       }}
-      className={"noselect"}
+      className={'noselect'}
       {...props}
     >
       {props.children}
@@ -116,41 +87,19 @@ function MarkerText(props: IMarker) {
   );
 }
 
-interface XYZ {
-  x: number;
-  y: number;
-  z: number;
-}
-
-const getMarkerPositionFromCoordinates = (lat: number, long: number): XYZ => {
-  const earthRadius = 1;
-
-  var phi = (90 - lat) * (Math.PI / 180);
-  var theta = (long + 180) * (Math.PI / 180);
-
-  const x = -(earthRadius * Math.sin(phi) * Math.cos(theta));
-  const z = earthRadius * Math.sin(phi) * Math.sin(theta);
-  const y = earthRadius * Math.cos(phi);
-  return {
-    x,
-    y,
-    z,
-  };
-};
-
-function degrees_to_radians(degrees: number) {
-  var pi = Math.PI;
+function degreesToRadians(degrees: number) {
+  const pi = Math.PI;
   return degrees * (pi / 180);
 }
 
 function calcPosFromLatLonRad(radius: number, lat: number, lon: number) {
-  var spherical = new THREE.Spherical(
+  const spherical = new THREE.Spherical(
     radius,
-    degrees_to_radians(90 - lon),
-    degrees_to_radians(lat) + Math.PI * 0.5
+    degreesToRadians(90 - lon),
+    degreesToRadians(lat) + Math.PI * 0.5
   );
 
-  var vector = new THREE.Vector3();
+  const vector = new THREE.Vector3();
   vector.setFromSpherical(spherical);
 
   return vector;
@@ -158,10 +107,10 @@ function calcPosFromLatLonRad(radius: number, lat: number, lon: number) {
 
 const CameraWrapper = () => {
   const { camera } = useThree();
-  var fullWidth = window.innerWidth;
-  var fullHeight = window.innerHeight;
-  var xPixels = -600;
-  var yPixels = 200;
+  const fullWidth = window.innerWidth;
+  const fullHeight = window.innerHeight;
+  const xPixels = -600;
+  const yPixels = 200;
 
   camera.setViewOffset(
     fullWidth,
@@ -177,13 +126,13 @@ const CameraWrapper = () => {
 function EarthBase(props: any) {
   const displacementMap = useLoader(
     TextureLoader,
-    "/earth/displacement_alt.png"
+    '/earth/displacement_alt.png'
   );
-  const colorMap = useLoader(TextureLoader, "/earth/color2.jpg");
-  const nightMap = useLoader(TextureLoader, "/earth/night2.jpg");
+  const colorMap = useLoader(TextureLoader, '/earth/color2.jpg');
+  const nightMap = useLoader(TextureLoader, '/earth/night2.jpg');
   // const nightMap = useLoader(TextureLoader, "/earth/test.png");
-  const specMap = useLoader(TextureLoader, "/earth/earth_spec.png");
-  const earthRef = props.earthRef;
+  const specMap = useLoader(TextureLoader, '/earth/earth_spec.png');
+  const { earthRef } = props;
   const washingtonDCCartesianCoords = useMemo(() => {
     return calcPosFromLatLonRad(10, -77.0369, 38.9072);
   }, []);
@@ -192,20 +141,20 @@ function EarthBase(props: any) {
   const mat = useRef<any>();
   // const arrowHelperRef = useRef<any>();
 
-
-  useFrame((state, delta) => {
+  useFrame(() => {
     groupRef.current.rotation.y += 0.0005;
-    if (mat?.current?.uniforms && groupRef.current && props.sunRef.current.position) {
-
+    if (
+      mat?.current?.uniforms &&
+      groupRef.current &&
+      props.sunRef.current.position
+    ) {
       // get the relative position of the sun
-      var v = new THREE.Vector3();
+      const v = new THREE.Vector3();
       v.copy(props.sunRef.current?.position);
       props.sunRef.current?.localToWorld(v);
       groupRef.current?.worldToLocal(v);
       // arrowHelperRef.current.setDirection(v)
-      mat.current.uniforms.uLight.value = v
-    
-
+      mat.current.uniforms.uLight.value = v;
     }
   });
   const uniforms = useMemo(
@@ -219,7 +168,13 @@ function EarthBase(props: any) {
   return (
     <group ref={groupRef} rotation={[0, Math.PI, 0]}>
       {/* <arrowHelper ref={arrowHelperRef} args={[new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 15, 'orange']} /> */}
-      <mesh visible scale={10} ref={earthRef} receiveShadow={true} onClick={() => console.log("Earth clicked")} >
+      <mesh
+        visible
+        scale={10}
+        ref={earthRef}
+        receiveShadow={true}
+        onClick={() => console.log('Earth clicked')}
+      >
         <sphereGeometry args={[1, 400, 400]} />
 
         <CustomShaderMaterial
@@ -258,9 +213,8 @@ function EarthBase(props: any) {
           `}
           uniforms={uniforms}
           displacementMap={displacementMap}
-          specularMap={specMap} 
+          specularMap={specMap}
           displacementScale={0.08}
-
         />
 
         {/* <meshPhongMaterial
@@ -278,17 +232,17 @@ function EarthBase(props: any) {
       </mesh>
 
       <group position={washingtonDCCartesianCoords}>
-        <Marker occludeRef={[occludeRef]}/>
+        <Marker occludeRef={[occludeRef]} />
         <MarkerText occludeRef={[occludeRef]}>
           <div
             style={{
-              position: "absolute",
+              position: 'absolute',
               right: 14,
               top: -120,
-              display: "flex",
-              width: "130px",
-              overflow: "wrap",
-              aspectRatio: "1:1",
+              display: 'flex',
+              width: '130px',
+              overflow: 'wrap',
+              aspectRatio: '1:1',
             }}
           >
             <img src="/me.png" />
@@ -300,9 +254,11 @@ function EarthBase(props: any) {
 }
 
 function EarthClouds() {
-  const clouds = useLoader(TextureLoader, "/earth/clouds.png");
+  const clouds = useLoader(TextureLoader, '/earth/clouds.jpg');
   const cloudsRef = useRef<Mesh>(null!);
-  useFrame((state, delta) => (cloudsRef.current.rotation.y += 0.00075));
+  useFrame(() => {
+    cloudsRef.current.rotation.y += 0.00075;
+  });
   return (
     <mesh
       visible
@@ -323,10 +279,12 @@ function EarthClouds() {
 }
 
 function Moon() {
-  const displacementMap = useLoader(TextureLoader, "/earth/moon_dis.png");
-  const colorMap = useLoader(TextureLoader, "/earth/moon.png");
+  const displacementMap = useLoader(TextureLoader, '/earth/moon_dis.png');
+  const colorMap = useLoader(TextureLoader, '/earth/moon.png');
   const moonParentRef = useRef<any>(null!);
-  useFrame((state, delta) => (moonParentRef.current.rotation.y += 0.001));
+  useFrame(() => {
+    moonParentRef.current.rotation.y += 0.001;
+  });
   return (
     <group ref={moonParentRef}>
       <mesh
@@ -359,7 +317,7 @@ function Moon() {
 }
 
 function Sun(props: any) {
-  const colorMap = useLoader(TextureLoader, "/earth/sun.jpg");
+  const colorMap = useLoader(TextureLoader, '/earth/sun.jpg');
   // useFrame((state, delta) => (sunParentRef.current.rotation.y += 0.001))\
   const sunMeshRef = useRef<any>();
   useLayoutEffect(() => {
@@ -369,10 +327,10 @@ function Sun(props: any) {
     <group ref={props.sunRef} position={[150, 0, 0]}>
       <mesh visible scale={5} ref={sunMeshRef}>
         <sphereGeometry args={[1, 200, 200]} />
-        <meshLambertMaterial emissiveMap={colorMap} emissive={"white"} />
+        <meshLambertMaterial emissiveMap={colorMap} emissive={'white'} />
       </mesh>
       <pointLight
-        color={"white"}
+        color={'white'}
         intensity={3}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -385,24 +343,27 @@ function Sun(props: any) {
   );
 }
 
-
 function Earth() {
-  const skybox1 = useLoader(TextureLoader, "/earth/skybox3.jpg");
+  const skybox1 = useLoader(TextureLoader, '/earth/skybox3.jpg');
   const earthRef = useRef<Mesh>(null!);
   const sunRef = useRef<Mesh>(null!);
-  const earthUI = useContext(UIEarthContext)
-  console.log(earthUI)
+  const earthUI = useContext(UIEarthContext);
+  console.log(earthUI);
   return (
     // <Image src={"/earth/color.png"} alt="me" width="64" height="64"></Image>
     <Canvas
       style={{
-        position: "absolute",
-        height: "100vh",
+        position: 'absolute',
+        height: '100vh',
         top: 0,
         left: 0,
         zIndex: -1,
       }}
-      gl={{ antialias: true, pixelRatio: window.devicePixelRatio, outputEncoding: sRGBEncoding }}
+      gl={{
+        antialias: true,
+        pixelRatio: window.devicePixelRatio,
+        outputEncoding: sRGBEncoding,
+      }}
       shadows={true}
       camera={{ fov: 45, position: [-70, 0, -20] }}
     >
@@ -416,7 +377,7 @@ function Earth() {
         <EarthClouds />
         <Moon />
         <Sun sunRef={sunRef} />
-      
+
         {/* <CityLights /> */}
 
         <mesh>
@@ -424,8 +385,6 @@ function Earth() {
           <meshBasicMaterial map={skybox1} side={THREE.BackSide} />
         </mesh>
       </UIEarthContext.Provider>
-
-
     </Canvas>
   );
 }
