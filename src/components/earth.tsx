@@ -52,7 +52,7 @@ function Marker(props: IMarker) {
       className={'noselect pulsating-circle'}
       {...props}
     >
-      <div onClick={toggleLander} className={styles.pulsatingcircle} />
+      <div onClick={toggleLander} style={{zIndex:10000}} className={styles.pulsatingcircle} />
       {props.children}
     </Html>
   );
@@ -166,7 +166,7 @@ function EarthBase(props: any) {
     []
   );
   return (
-    <group ref={groupRef} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} rotation={[0, Math.PI*0.5, 0]}>
       {/* <arrowHelper ref={arrowHelperRef} args={[new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 15, 'orange']} /> */}
       <mesh
         visible
@@ -365,11 +365,11 @@ function Earth() {
         outputEncoding: sRGBEncoding,
       }}
       shadows={true}
-      camera={{ fov: 45, position: [-70, 0, -20] }}
+      camera={{ fov: 45, position: [30, 20, 0] }}
     >
       {/* https://github.com/pmndrs/react-three-fiber/issues/262 */}
       <UIEarthContext.Provider value={earthUI}>
-        <OrbitControls maxDistance={100} />
+        <OrbitControls maxDistance={100} enablePan={false} />
         <CameraWrapper />
         <ambientLight intensity={0.15} />
 

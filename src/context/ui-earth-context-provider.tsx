@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic"
 import React, {useContext, createContext, Dispatch, useState, memo, Suspense} from "react"
 import { useMemo } from "react"
+import { LoadingOverlay, LoadingOverlayDone, LoadingOverlayProvider } from "./loading-overlay"
 import { UIEarthContext, UIEarthState, defaultContext } from "./ui-earth-context"
 const Earth = dynamic(
   () => import('../components/earth'),
@@ -29,9 +30,13 @@ export const UIEarthContextProvider = memo(({children}:{children: React.ReactNod
 
   return (
     <UIEarthContext.Provider value={earthState} >
-      <Suspense fallback={<div id="placeholder">Loading earth</div>}>
-        <Earth />
-      </Suspense>      
+      <LoadingOverlayProvider>
+        <LoadingOverlay />
+        <Suspense fallback={<LoadingOverlayDone />}>
+          <Earth />
+        </Suspense>             
+      </LoadingOverlayProvider>
+ 
       {children}
     </UIEarthContext.Provider>
   )

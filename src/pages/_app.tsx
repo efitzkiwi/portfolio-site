@@ -1,8 +1,10 @@
 import '../styles/global.css';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, createEmotionCache } from '@mantine/core';
 import { UIEarthContextProvider } from '@/context/ui-earth-context-provider';
+
+const myCache = createEmotionCache({ key: 'mantine', prepend: false });
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
@@ -20,7 +22,9 @@ export default function App(props: AppProps) {
         theme={{
           /** Put your mantine theme override here */
           colorScheme: 'dark',
+          fontFamily: "Saira"
         }}
+        emotionCache={myCache}
       >
         
         <UIEarthContextProvider>
