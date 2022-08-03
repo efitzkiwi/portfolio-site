@@ -32,7 +32,6 @@ function Marker(props: IMarker) {
   // const {camera} = useThree()
 
   const toggleLander = () => {
-    console.log('Lander clicked');
     earthContext.callbackFuncs.toggleLander();
   };
 
@@ -52,7 +51,11 @@ function Marker(props: IMarker) {
       className={'noselect pulsating-circle'}
       {...props}
     >
-      <div onClick={toggleLander} style={{zIndex:10000}} className={styles.pulsatingcircle} />
+      <div
+        onClick={toggleLander}
+        style={{ zIndex: 10000 }}
+        className={styles.pulsatingcircle}
+      />
       {props.children}
     </Html>
   );
@@ -166,15 +169,9 @@ function EarthBase(props: any) {
     []
   );
   return (
-    <group ref={groupRef} rotation={[0, Math.PI*0.5, 0]}>
+    <group ref={groupRef} rotation={[0, Math.PI * 0.5, 0]}>
       {/* <arrowHelper ref={arrowHelperRef} args={[new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 15, 'orange']} /> */}
-      <mesh
-        visible
-        scale={10}
-        ref={earthRef}
-        receiveShadow={true}
-        onClick={() => console.log('Earth clicked')}
-      >
+      <mesh visible scale={10} ref={earthRef} receiveShadow={true}>
         <sphereGeometry args={[1, 400, 400]} />
 
         <CustomShaderMaterial
@@ -245,7 +242,7 @@ function EarthBase(props: any) {
               aspectRatio: '1:1',
             }}
           >
-            <img src="/me.png" />
+            <img src="/me.png" alt="me" />
           </div>
         </MarkerText>
       </group>
@@ -348,7 +345,6 @@ function Earth() {
   const earthRef = useRef<Mesh>(null!);
   const sunRef = useRef<Mesh>(null!);
   const earthUI = useContext(UIEarthContext);
-  console.log(earthUI);
   return (
     // <Image src={"/earth/color.png"} alt="me" width="64" height="64"></Image>
     <Canvas

@@ -17,5 +17,5 @@ module.exports = withBundleAnalyzer({
   compiler: {
     // https://styled-components.com/docs/advanced
     styledComponents: true,
-  }
+  },
 });

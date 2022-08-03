@@ -1,43 +1,44 @@
-import dynamic from "next/dynamic"
-import React, {useContext, createContext, Dispatch, useState, memo, Suspense} from "react"
-import { useMemo } from "react"
-import { LoadingOverlay, LoadingOverlayDone, LoadingOverlayProvider } from "./loading-overlay"
-import { UIEarthContext, UIEarthState, defaultContext } from "./ui-earth-context"
-const Earth = dynamic(
-  () => import('../components/earth'),
-  { ssr: false }
-  )
+import dynamic from 'next/dynamic';
+import React, { memo, Suspense, useState } from 'react';
 
-export const UIEarthContextProvider = memo(({children}:{children: React.ReactNode}) => {
+import {
+  LoadingOverlay,
+  LoadingOverlayDone,
+  LoadingOverlayProvider,
+} from './loading-overlay';
+import type { UIEarthState } from './ui-earth-context';
+import { defaultContext, UIEarthContext } from './ui-earth-context';
 
+const Earth = dynamic(() => import('../components/earth'), { ssr: false });
 
-  const cbEarthLander = () => {
-    console.log("toggle")
-    setEarthState((prev) => ({
-      ...prev,
-      landerOpen: !prev.landerOpen
-    }))
+export const UIEarthContextProvider = memo(
+  ({ children }: { children: React.ReactNode }) => {
+    const cbEarthLander = () => {
+      console.log('toggle');
+      setEarthState((prev) => ({
+        ...prev,
+        landerOpen: !prev.landerOpen,
+      }));
+    };
+
+    const [earthState, setEarthState] = useState<UIEarthState>({
+      ...defaultContext.state,
+      callbackFuncs: {
+        toggleLander: cbEarthLander,
+      },
+    });
+
+    return (
+      <UIEarthContext.Provider value={earthState}>
+        <LoadingOverlayProvider>
+          <LoadingOverlay />
+          <Suspense fallback={<LoadingOverlayDone />}>
+            <Earth />
+          </Suspense>
+        </LoadingOverlayProvider>
+
+        {children}
+      </UIEarthContext.Provider>
+    );
   }
-
-
-  const [earthState, setEarthState] = useState<UIEarthState>({
-    ...defaultContext.state,
-    callbackFuncs: {
-      toggleLander: cbEarthLander
-    }
-  })
-
-
-  return (
-    <UIEarthContext.Provider value={earthState} >
-      <LoadingOverlayProvider>
-        <LoadingOverlay />
-        <Suspense fallback={<LoadingOverlayDone />}>
-          <Earth />
-        </Suspense>             
-      </LoadingOverlayProvider>
- 
-      {children}
-    </UIEarthContext.Provider>
-  )
-})
+);
