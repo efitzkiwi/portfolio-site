@@ -1,4 +1,4 @@
-import type { MantineGradient } from '@mantine/core';
+import type { MantineColor, MantineGradient } from '@mantine/core';
 import {
   Anchor,
   Badge,
@@ -9,7 +9,6 @@ import {
   SimpleGrid,
   Text,
 } from '@mantine/core';
-import { useHover } from '@mantine/hooks';
 import {
   IconBrandGithub,
   IconBrandGmail,
@@ -25,12 +24,13 @@ import { Main } from '@/templates/Main';
 
 interface IProjectBadge {
   text: string;
-  color: string;
+  color: MantineColor;
 }
 
 interface IMyProject {
   projectURL: string;
   projectTitle: string;
+  description: string;
   projectImage?: string;
   badges?: IProjectBadge[];
 }
@@ -38,6 +38,7 @@ interface IMyProject {
 interface IHomeState {
   helloColor: MantineGradient;
   projects: IMyProject[];
+  hoverIndex: number;
 }
 
 const colors: string[] = [
@@ -60,26 +61,41 @@ const RenderProjectCard = (inputProject: IMyProject) => {
     <Card shadow="sm" p="lg" radius="md" withBorder>
       <Card.Section>
         <MantineImage
-          src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=720&q=80"
-          height={160}
-          alt="Norway"
+          src={inputProject.projectImage}
+          height={80}
+          alt="proj-img"
         />
       </Card.Section>
 
-      <Group position="apart" mt="md" mb="xs">
-        <Text weight={500}>Norway Fjord Adventures</Text>
-        <Badge color="pink" variant="light">
-          On Sale
-        </Badge>
+      <Text mt="md" weight={500}>
+        {inputProject.projectTitle}
+      </Text>
+      <Group position="left" mb="xs">
+        {inputProject.badges?.map((badge, index) => {
+          return (
+            <Badge key={index} color={badge.color} variant="light">
+              {badge.text}
+            </Badge>
+          );
+        })}
       </Group>
 
       <Text size="sm" color="dimmed">
-        With Fjord Tours you can explore more of the magical fjord landscapes
-        with tours and activities on and around the fjords of Norway
+        {inputProject.description}
       </Text>
 
-      <Button variant="light" color="blue" fullWidth mt="md" radius="md">
-        Book classic tour now
+      <Button
+        component="a"
+        target="_blank"
+        rel="noopener noreferrer"
+        href={inputProject.projectURL}
+        variant="light"
+        color="blue"
+        fullWidth
+        mt="md"
+        radius="md"
+      >
+        View project
       </Button>
     </Card>
   );
@@ -100,45 +116,93 @@ const Index = () => {
 
   const [homeState, setHomeState] = useState<IHomeState>({
     helloColor: { from: 'inherit', to: 'inherit', deg: 45 },
-    projects: [
-      {
-        projectURL: 'maksmda',
-        projectTitle: 'Hello wtf',
-        projectImage: 'asdasdsa',
-        badges: [],
-      },
-      {
-        projectURL: 'maksmda',
-        projectTitle: 'Hello wtf',
-        projectImage: 'asdasdsa',
-        badges: [],
-      },
-      {
-        projectURL: 'maksmda',
-        projectTitle: 'Hello wtf',
-        projectImage: 'asdasdsa',
-        badges: [],
-      },
-      {
-        projectURL: 'maksmda',
-        projectTitle: 'Hello wtf',
-        projectImage: 'asdasdsa',
-        badges: [],
-      },
-      {
-        projectURL: 'maksmda',
-        projectTitle: 'Hello wtf',
-        projectImage: 'asdasdsa',
-        badges: [],
-      },
-    ],
+    projects: [],
+    hoverIndex: 0,
   });
-  const { hovered, ref } = useHover();
 
   useEffect(() => {
     setHomeState((prev) => ({
       ...prev,
       helloColor: getRandomGradient(),
+      projects: [
+        {
+          projectURL: 'https://github.com/efitzkiwi/NT8SupplyDemandDTBot',
+          projectTitle: 'NT8SupplyDemandBot',
+          projectImage: '/ninjatrader.png',
+          badges: [
+            {
+              text: 'C#',
+              color: 'lime',
+            },
+          ],
+          description:
+            'Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.',
+        },
+        {
+          projectURL: 'https://bagsbydata.com',
+          projectTitle: 'BagsByData.com',
+          projectImage: '/bagsbydata.png',
+          badges: [
+            {
+              color: 'blue',
+              text: 'Typescript',
+            },
+            {
+              color: 'teal',
+              text: 'React',
+            },
+            {
+              color: 'orange',
+              text: 'Python',
+            },
+            {
+              color: 'green',
+              text: 'Django',
+            },
+          ],
+          description:
+            'Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.',
+        },
+        {
+          projectURL:
+            'https://github.com/efitzkiwi/Websocket-Data-Bridge-Public',
+          projectTitle: 'Websocket Bridge',
+          projectImage: '/databridge.png',
+          badges: [
+            {
+              text: 'Go',
+              color: 'grape',
+            },
+            {
+              text: 'API',
+              color: 'red',
+            },
+          ],
+          description:
+            'Go implementation of a polygon.io stock data API bridge. This bridge allows unlimited clients to connect to a single Polygon.io api connection by routing traffic through a high-speed websocket.',
+        },
+        {
+          projectURL: 'https://github.com/efitzkiwi/portfolio-site',
+          projectTitle: `${window.location.hostname}!`,
+          projectImage: '/earth.png',
+          badges: [
+            {
+              color: 'blue',
+              text: 'Typescript',
+            },
+            {
+              color: 'teal',
+              text: 'React',
+            },
+            {
+              color: 'gray',
+              text: 'Next JS',
+            },
+          ],
+          description:
+            'Combined ThreeJS, react, and NextJS to build this beautiful earth simulation!',
+        },
+      ],
     }));
   }, []);
 
@@ -147,7 +211,7 @@ const Index = () => {
       ...prev,
       helloColor: getRandomGradient(),
     }));
-  }, [hovered]);
+  }, [homeState.hoverIndex]);
 
   return (
     <Main meta={<Meta title="Home" description="Eoin's website" />}>
@@ -160,7 +224,12 @@ const Index = () => {
             align="center"
             variant="gradient"
             gradient={homeState.helloColor}
-            ref={ref}
+            onMouseEnter={() =>
+              setHomeState((prev) => ({
+                ...prev,
+                hoverIndex: prev.hoverIndex + 1,
+              }))
+            }
           >
             HOWDY,
           </Text>{' '}
@@ -169,7 +238,7 @@ const Index = () => {
       </div>
 
       <div>
-        I'm a fullstack software developer based outside of DC. I'm building
+        I am a fullstack software developer based outside of DC. Building
         <Anchor href="https://bagsbydata.com/" target="_blank">
           {' '}
           BagsByData.com{' '}
@@ -181,10 +250,10 @@ const Index = () => {
 
       <h3>Projects</h3>
       <SimpleGrid
-        cols={3}
-        spacing={'md'}
+        cols={2}
+        spacing={'lg'}
         breakpoints={[
-          { maxWidth: 766, cols: 2, spacing: 'sm' },
+          { maxWidth: 766, cols: 2, spacing: 'md' },
           { maxWidth: 600, cols: 1, spacing: 'sm' },
         ]}
       >
@@ -193,7 +262,14 @@ const Index = () => {
         })}
       </SimpleGrid>
 
-      <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '5px',
+          justifyContent: 'center',
+          marginTop: '50px',
+        }}
+      >
         <Button
           variant="gradient"
           gradient={homeState.helloColor}

@@ -1,9 +1,11 @@
+import { useMantineColorScheme } from '@mantine/core';
 import { Html, OrbitControls } from '@react-three/drei';
 import type { HtmlProps } from '@react-three/drei/web/Html';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import type { Ref } from 'react';
 import React, {
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -317,25 +319,73 @@ function Sun(props: any) {
   const colorMap = useLoader(TextureLoader, '/earth/sun.jpg');
   // useFrame((state, delta) => (sunParentRef.current.rotation.y += 0.001))\
   const sunMeshRef = useRef<any>();
+  const globalSunRef = useRef<any>();
+  const [lightRotation, setLightRotation] = useState<THREE.Euler>(
+    new THREE.Euler(0, 0, 0)
+  );
+  const [darkRotation, setDarkRotation] = useState<THREE.Euler>(
+    new THREE.Euler(0, Math.PI, 0)
+  );
+
+  const [startRotation, setStartRotation] = useState<THREE.Euler>(
+    props.theme === 'dark' ? darkRotation : lightRotation
+  );
+  const [desitnationRotation, setDesitnationRotation] =
+    useState<THREE.Euler>(startRotation);
+
+  const zAxis = useMemo(() => new THREE.Vector3(0, 0, 1), []);
+
   useLayoutEffect(() => {
     sunMeshRef.current.layers.set(0);
   }, []);
+
+  useEffect(() => {
+    console.log('new scheme', props.theme);
+    if (props.theme === 'light') {
+      setDesitnationRotation(lightRotation);
+    } else if (props.theme === 'dark') {
+      setDesitnationRotation(darkRotation);
+    }
+  }, [props.theme]);
+
+  // useFrame((state, delta) => {
+  //   props.sunRef.current.rotation.y += 0.001
+  // })
+
+  useFrame(() => {
+    // if (destinationPosition != props.sunRef.current.position) {
+    //   // select the Z world axis
+    //   const myAxis = new THREE.Vector3(0, 0, 1);
+    //   // rotate the mesh 45 on this axis
+    //   cube.rotateOnWorldAxis(myAxis, THREE.Math.degToRad(45));
+    //   props.sunRef.current.position.lerp(destinationPosition, 0.1);
+    // }
+
+    const newQat = new THREE.Quaternion().setFromEuler(desitnationRotation);
+    if (!globalSunRef.current.quaternion.equals(newQat)) {
+      // console.log(globalSunRef.current.quaternion, newQat)
+      globalSunRef.current.quaternion.slerp(newQat, 0.01);
+    }
+  });
+
   return (
-    <group ref={props.sunRef} position={[150, 0, 0]}>
-      <mesh visible scale={5} ref={sunMeshRef}>
-        <sphereGeometry args={[1, 200, 200]} />
-        <meshLambertMaterial emissiveMap={colorMap} emissive={'white'} />
-      </mesh>
-      <pointLight
-        color={'white'}
-        intensity={3}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-darkness={2}
-        shadow-bias={0.00001}
-        shadow-cameraVisible={true}
-        castShadow={true}
-      />
+    <group ref={globalSunRef} position={[0, 0, 0]} rotation={[0, 0, 0]}>
+      <group ref={props.sunRef} position={[150, 0, 0]}>
+        <mesh visible scale={5} ref={sunMeshRef}>
+          <sphereGeometry args={[1, 200, 200]} />
+          <meshLambertMaterial emissiveMap={colorMap} emissive={'white'} />
+        </mesh>
+        <pointLight
+          color={'white'}
+          intensity={3}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-darkness={2}
+          shadow-bias={0.00001}
+          shadow-cameraVisible={true}
+          castShadow={true}
+        ></pointLight>
+      </group>
     </group>
   );
 }
@@ -345,6 +395,8 @@ function Earth() {
   const earthRef = useRef<Mesh>(null!);
   const sunRef = useRef<Mesh>(null!);
   const earthUI = useContext(UIEarthContext);
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+
   return (
     // <Image src={"/earth/color.png"} alt="me" width="64" height="64"></Image>
     <Canvas
@@ -372,7 +424,7 @@ function Earth() {
         <EarthBase earthRef={earthRef} sunRef={sunRef} />
         <EarthClouds />
         <Moon />
-        <Sun sunRef={sunRef} />
+        <Sun sunRef={sunRef} theme={colorScheme} />
 
         {/* <CityLights /> */}
 
