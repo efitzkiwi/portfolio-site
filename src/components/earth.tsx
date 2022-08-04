@@ -1,8 +1,7 @@
-import { useMantineColorScheme } from '@mantine/core';
-import { Html, OrbitControls } from '@react-three/drei';
-import type { HtmlProps } from '@react-three/drei/web/Html';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import type { Ref } from 'react';
+import { useMantineColorScheme } from "@mantine/core";
+import { Html, OrbitControls } from "@react-three/drei";
+import type { HtmlProps } from "@react-three/drei/web/Html";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import React, {
   useContext,
   useEffect,
@@ -10,17 +9,52 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import type { Mesh, Object3D } from 'three';
-import * as THREE from 'three';
-import { MeshPhongMaterial, sRGBEncoding, TextureLoader } from 'three';
-import CustomShaderMaterial from 'three-custom-shader-material';
+  Ref,
+  Suspense,
+} from "react";
+import type { Mesh, Object3D } from "three";
+import * as THREE from "three";
+import { MeshPhongMaterial, TextureLoader } from "three";
+import CustomShaderMaterial from "three-custom-shader-material";
 
-import { UIEarthContext } from '@/context/ui-earth-context';
+import { UIEarthContext } from "@/context/ui-earth-context";
 
-import styles from '../styles/earth.module.scss';
+import styles from "../styles/earth.module.scss";
 
 // https://codesandbox.io/s/priceless-bohr-xlum2?file=/src/models/Earth.js:158-165
+
+const vs = `
+uniform vec3 uLight;
+varying vec2 vUv2;
+varying float vDist;
+
+float map(float value, float min1, float max1, float min2, float max2) {
+  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
+float normalize(float v) { return map(v, -1.0, 1.0, 0.0, 1.0); }
+
+void main() {
+  vUv2 = uv;
+  vDist = clamp(pow(normalize(dot(normalize(uLight) * vec3(-1.,1.,-1.) , position) * 2.), 1.), 0., 1.);
+}
+`;
+
+const fs = `
+uniform sampler2D uDay;
+uniform sampler2D uNight;
+uniform vec3 uLight;
+varying vec2 vUv2;
+varying float vDist;
+
+void main() {
+  vec4 texDay = texture2D(uDay, vUv2);
+  vec4 texNight = texture2D(uNight, vUv2);
+  float c = vDist;
+  vec4 d = mix(texDay,texNight,vDist);
+  csm_DiffuseColor = d;
+}
+`;
 
 interface IMarker extends HtmlProps {
   occludeRef?: Ref<Object3D>[];
@@ -46,11 +80,11 @@ function Marker(props: IMarker) {
       onOcclude={occlude}
       // We just interpolate the visible state into css opacity and transforms
       style={{
-        transition: 'all 0.2s',
+        transition: "all 0.2s",
         opacity: occluded ? 0 : 1,
         transform: `scale(${occluded ? 0.25 : 1})`,
       }}
-      className={'noselect pulsating-circle'}
+      className={"noselect pulsating-circle"}
       {...props}
     >
       <div
@@ -80,11 +114,11 @@ function MarkerText(props: IMarker) {
       onOcclude={occlude}
       // We just interpolate the visible state into css opacity and transforms
       style={{
-        transition: 'all 0.2s',
+        transition: "all 0.2s",
         opacity: occluded ? 0 : 1,
         transform: `scale(${occluded ? 0.25 : 1})`,
       }}
-      className={'noselect'}
+      className={"noselect"}
       {...props}
     >
       {props.children}
@@ -128,18 +162,104 @@ const CameraWrapper = () => {
   return null;
 };
 
-function EarthBase(props: any) {
-  const displacementMap = useLoader(
+function EarthItselfMin(props: any) {
+  const [colorMap, nightMap, specMap, displacementMap] = useLoader(
     TextureLoader,
-    '/earth/displacement_alt.png'
+    [
+      "/earth/color_min.jpg",
+      "/earth/night2.jpg",
+      "/earth/earth_spec.jpg",
+      "/earth/displacement_alt_min.jpg",
+    ]
   );
-  const colorMap = useLoader(TextureLoader, '/earth/color2.jpg');
-  const nightMap = useLoader(TextureLoader, '/earth/night2.jpg');
-  // const nightMap = useLoader(TextureLoader, "/earth/test.png");
-  const specMap = useLoader(TextureLoader, '/earth/earth_spec.png');
+
+  const uniforms = useMemo(
+    () => ({
+      uDay: { value: colorMap },
+      uNight: { value: nightMap },
+      uLight: { value: new THREE.Vector3(1, 0, 0) },
+    }),
+    [colorMap, nightMap]
+  );
+
+  return (
+    <mesh visible scale={10} ref={props.earthRef} receiveShadow={true}>
+      <sphereGeometry args={[1, 400, 400]} />
+
+      <CustomShaderMaterial
+        ref={props.mat}
+        baseMaterial={MeshPhongMaterial}
+        vertexShader={vs}
+        fragmentShader={fs}
+        uniforms={uniforms}
+        displacementMap={displacementMap}
+        specularMap={specMap}
+        displacementScale={0.08}
+      />
+
+      {/* <meshPhongMaterial
+      map={colorMap}
+      displacementMap={displacementMap}
+      specularMap={specMap}
+      displacementScale={0.08}
+      opacity={1}
+      transparent={false}
+    /> */}
+    </mesh>
+  );
+}
+
+function EarthItselfMax(props: any) {
+  const [colorMap, nightMap, specMap, displacementMap] = useLoader(
+    TextureLoader,
+    [
+      "/earth/color2.jpg",
+      "/earth/night2.jpg",
+      "/earth/earth_spec.jpg",
+      "/earth/displacement_alt.png",
+    ]
+  );
+
+  const uniforms = useMemo(
+    () => ({
+      uDay: { value: colorMap },
+      uNight: { value: nightMap },
+      uLight: { value: new THREE.Vector3(1, 0, 0) },
+    }),
+    [colorMap, nightMap]
+  );
+
+  return (
+    <mesh visible scale={10} ref={props.earthRef} receiveShadow={true}>
+      <sphereGeometry args={[1, 400, 400]} />
+
+      <CustomShaderMaterial
+        ref={props.mat}
+        baseMaterial={MeshPhongMaterial}
+        vertexShader={vs}
+        fragmentShader={fs}
+        uniforms={uniforms}
+        displacementMap={displacementMap}
+        specularMap={specMap}
+        displacementScale={0.08}
+      />
+
+      {/* <meshPhongMaterial
+      map={colorMap}
+      displacementMap={displacementMap}
+      specularMap={specMap}
+      displacementScale={0.08}
+      opacity={1}
+      transparent={false}
+    /> */}
+    </mesh>
+  );
+}
+
+function EarthBase(props: any) {
   const { earthRef } = props;
   const washingtonDCCartesianCoords = useMemo(() => {
-    return calcPosFromLatLonRad(10, -77.0369, 38.9072);
+    return calcPosFromLatLonRad(10.2, -77.0369, 38.9072);
   }, []);
   const occludeRef = useRef<any>(null!);
   const groupRef = useRef<any>();
@@ -162,71 +282,15 @@ function EarthBase(props: any) {
       mat.current.uniforms.uLight.value = v;
     }
   });
-  const uniforms = useMemo(
-    () => ({
-      uDay: { value: colorMap },
-      uNight: { value: nightMap },
-      uLight: { value: new THREE.Vector3(1, 0, 0) },
-    }),
-    []
-  );
   return (
     <group ref={groupRef} rotation={[0, Math.PI * 0.5, 0]}>
       {/* <arrowHelper ref={arrowHelperRef} args={[new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 15, 'orange']} /> */}
-      <mesh visible scale={10} ref={earthRef} receiveShadow={true}>
-        <sphereGeometry args={[1, 400, 400]} />
 
-        <CustomShaderMaterial
-          ref={mat}
-          baseMaterial={MeshPhongMaterial}
-          vertexShader={`
-          uniform vec3 uLight;
-          varying vec2 vUv2;
-          varying float vDist;
+      <Suspense fallback={<EarthItselfMin mat={mat} earthRef={earthRef} />}>
+        <EarthItselfMax mat={mat} earthRef={earthRef} />
+      </Suspense>
 
-          float map(float value, float min1, float max1, float min2, float max2) {
-            return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
-          }
-          
-          float normalize(float v) { return map(v, -1.0, 1.0, 0.0, 1.0); }
-
-          void main() {
-            vUv2 = uv;
-            vDist = clamp(pow(normalize(dot(normalize(uLight) * vec3(-1.,1.,-1.) , position) * 2.), 1.), 0., 1.);
-          }
-          `}
-          fragmentShader={`
-          uniform sampler2D uDay;
-          uniform sampler2D uNight;
-          uniform vec3 uLight;
-          varying vec2 vUv2;
-          varying float vDist;
-
-          void main() {
-            vec4 texDay = texture2D(uDay, vUv2);
-            vec4 texNight = texture2D(uNight, vUv2);
-            float c = vDist;
-            vec4 d = mix(texDay,texNight,vDist);
-            csm_DiffuseColor = d;
-          }
-          `}
-          uniforms={uniforms}
-          displacementMap={displacementMap}
-          specularMap={specMap}
-          displacementScale={0.08}
-        />
-
-        {/* <meshPhongMaterial
-          map={colorMap}
-          displacementMap={displacementMap}
-          specularMap={specMap}
-          displacementScale={0.08}
-          opacity={1}
-          transparent={false}
-        /> */}
-      </mesh>
-
-      <mesh visible scale={10} ref={occludeRef} castShadow={true}>
+      <mesh scale={10} ref={occludeRef} castShadow={true}>
         <sphereGeometry args={[1, 50, 50]} />
       </mesh>
 
@@ -235,13 +299,13 @@ function EarthBase(props: any) {
         <MarkerText occludeRef={[occludeRef]}>
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               right: 14,
               top: -120,
-              display: 'flex',
-              width: '130px',
-              overflow: 'wrap',
-              aspectRatio: '1:1',
+              display: "flex",
+              width: "130px",
+              overflow: "wrap",
+              aspectRatio: "1:1",
             }}
           >
             <img src="/me.png" alt="me" />
@@ -252,18 +316,14 @@ function EarthBase(props: any) {
   );
 }
 
-function EarthClouds() {
-  const clouds = useLoader(TextureLoader, '/earth/clouds.jpg');
-  const cloudsRef = useRef<Mesh>(null!);
-  useFrame(() => {
-    cloudsRef.current.rotation.y += 0.00075;
-  });
+function CloudsItselfMin(props: any) {
+  const clouds = useLoader(TextureLoader, "/earth/clouds_min.jpg");
   return (
     <mesh
       visible
       rotation={[0, -Math.PI * 0.5, 0]}
       scale={10.5}
-      ref={cloudsRef}
+      ref={props.cloudsRef}
       receiveShadow={true}
     >
       <sphereGeometry args={[1, 100, 100]} />
@@ -277,9 +337,50 @@ function EarthClouds() {
   );
 }
 
+function CloudsItselfMax(props: any) {
+  const clouds = useLoader(TextureLoader, "/earth/clouds.jpg");
+  return (
+    <mesh
+      visible
+      rotation={[0, -Math.PI * 0.5, 0]}
+      scale={10.5}
+      ref={props.cloudsRef}
+      receiveShadow={true}
+    >
+      <sphereGeometry args={[1, 100, 100]} />
+      <meshStandardMaterial
+        map={clouds}
+        alphaMap={clouds}
+        opacity={0.8}
+        transparent={true}
+      />
+    </mesh>
+  );
+}
+
+function EarthClouds() {
+  const cloudsRef = useRef<Mesh>(null!);
+  useFrame(() => {
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += 0.00075;
+    }
+  });
+  return (
+    <Suspense fallback={<CloudsItselfMin />}>
+      <CloudsItselfMax cloudsRef={cloudsRef} />
+    </Suspense>
+  );
+}
+
 function Moon() {
-  const displacementMap = useLoader(TextureLoader, '/earth/moon_dis.png');
-  const colorMap = useLoader(TextureLoader, '/earth/moon.png');
+  // const displacementMap = useLoader(TextureLoader, '/earth/moon_dis.jpg');
+  // const colorMap = useLoader(TextureLoader, '/earth/moon.jpg');
+
+  const [colorMap, displacementMap] = useLoader(TextureLoader, [
+    "/earth/moon.jpg",
+    "/earth/moon_dis.jpg",
+  ]);
+
   const moonParentRef = useRef<any>(null!);
   useFrame(() => {
     moonParentRef.current.rotation.y += 0.001;
@@ -316,7 +417,7 @@ function Moon() {
 }
 
 function Sun(props: any) {
-  const colorMap = useLoader(TextureLoader, '/earth/sun.jpg');
+  const colorMap = useLoader(TextureLoader, "/earth/sun.jpg");
   // useFrame((state, delta) => (sunParentRef.current.rotation.y += 0.001))\
   const sunMeshRef = useRef<any>();
   const globalSunRef = useRef<any>();
@@ -328,10 +429,12 @@ function Sun(props: any) {
   );
 
   const [startRotation, setStartRotation] = useState<THREE.Euler>(
-    props.theme === 'dark' ? darkRotation : lightRotation
+    props.theme === "dark" ? darkRotation : lightRotation
   );
   const [desitnationRotation, setDesitnationRotation] =
-    useState<THREE.Euler>(startRotation);
+    useState<THREE.Quaternion>(
+      new THREE.Quaternion().setFromEuler(startRotation)
+    );
 
   const zAxis = useMemo(() => new THREE.Vector3(0, 0, 1), []);
 
@@ -340,31 +443,20 @@ function Sun(props: any) {
   }, []);
 
   useEffect(() => {
-    console.log('new scheme', props.theme);
-    if (props.theme === 'light') {
-      setDesitnationRotation(lightRotation);
-    } else if (props.theme === 'dark') {
-      setDesitnationRotation(darkRotation);
+    console.log("new scheme", props.theme);
+    if (props.theme === "light") {
+      setDesitnationRotation(
+        new THREE.Quaternion().setFromEuler(lightRotation)
+      );
+    } else if (props.theme === "dark") {
+      setDesitnationRotation(new THREE.Quaternion().setFromEuler(darkRotation));
     }
   }, [props.theme]);
 
-  // useFrame((state, delta) => {
-  //   props.sunRef.current.rotation.y += 0.001
-  // })
-
   useFrame(() => {
-    // if (destinationPosition != props.sunRef.current.position) {
-    //   // select the Z world axis
-    //   const myAxis = new THREE.Vector3(0, 0, 1);
-    //   // rotate the mesh 45 on this axis
-    //   cube.rotateOnWorldAxis(myAxis, THREE.Math.degToRad(45));
-    //   props.sunRef.current.position.lerp(destinationPosition, 0.1);
-    // }
-
-    const newQat = new THREE.Quaternion().setFromEuler(desitnationRotation);
-    if (!globalSunRef.current.quaternion.equals(newQat)) {
+    if (!globalSunRef.current.quaternion.equals(desitnationRotation)) {
       // console.log(globalSunRef.current.quaternion, newQat)
-      globalSunRef.current.quaternion.slerp(newQat, 0.01);
+      globalSunRef.current.quaternion.slerp(desitnationRotation, 0.01);
     }
   });
 
@@ -373,10 +465,10 @@ function Sun(props: any) {
       <group ref={props.sunRef} position={[150, 0, 0]}>
         <mesh visible scale={5} ref={sunMeshRef}>
           <sphereGeometry args={[1, 200, 200]} />
-          <meshLambertMaterial emissiveMap={colorMap} emissive={'white'} />
+          <meshLambertMaterial emissiveMap={colorMap} emissive={"white"} />
         </mesh>
         <pointLight
-          color={'white'}
+          color={"white"}
           intensity={3}
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -391,26 +483,23 @@ function Sun(props: any) {
 }
 
 function Earth() {
-  const skybox1 = useLoader(TextureLoader, '/earth/skybox3.jpg');
+  const skybox1 = useLoader(TextureLoader, "/earth/skybox3.jpg");
   const earthRef = useRef<Mesh>(null!);
   const sunRef = useRef<Mesh>(null!);
   const earthUI = useContext(UIEarthContext);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   return (
-    // <Image src={"/earth/color.png"} alt="me" width="64" height="64"></Image>
     <Canvas
       style={{
-        position: 'absolute',
-        height: '100vh',
+        position: "absolute",
+        height: "100vh",
         top: 0,
         left: 0,
         zIndex: -1,
       }}
       gl={{
         antialias: true,
-        pixelRatio: window.devicePixelRatio,
-        outputEncoding: sRGBEncoding,
       }}
       shadows={true}
       camera={{ fov: 45, position: [30, 20, 0] }}

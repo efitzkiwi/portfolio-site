@@ -1,4 +1,4 @@
-import type { MantineColor, MantineGradient } from '@mantine/core';
+import type { MantineColor, MantineGradient } from "@mantine/core";
 import {
   Anchor,
   Badge,
@@ -8,17 +8,17 @@ import {
   Image as MantineImage,
   SimpleGrid,
   Text,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconBrandGithub,
   IconBrandGmail,
   IconBrandLinkedin,
-} from '@tabler/icons';
-import { Fragment, useContext, useEffect, useState } from 'react';
+} from "@tabler/icons";
+import { Fragment, useContext, useEffect, useState } from "react";
 
-import { UIEarthContext } from '@/context/ui-earth-context';
-import { Meta } from '@/layouts/Meta';
-import { Main } from '@/templates/Main';
+import { UIEarthContext } from "@/context/ui-earth-context";
+import { Meta } from "@/layouts/Meta";
+import { Main } from "@/templates/Main";
 
 // import Earth from '@/components/earth';
 
@@ -42,18 +42,18 @@ interface IHomeState {
 }
 
 const colors: string[] = [
-  '#E03131',
-  '#C2255C',
-  '#9C36B5',
-  '#6741D9',
-  '#3B5BDB',
-  '#1971C2',
-  '#0C8599',
-  '#099268',
-  '#2F9E44',
-  '#66A80F',
-  '#F08C00',
-  '#E8590C',
+  "#E03131",
+  "#C2255C",
+  "#9C36B5",
+  "#6741D9",
+  "#3B5BDB",
+  "#1971C2",
+  "#0C8599",
+  "#099268",
+  "#2F9E44",
+  "#66A80F",
+  "#F08C00",
+  "#E8590C",
 ];
 
 const RenderProjectCard = (inputProject: IMyProject) => {
@@ -108,14 +108,14 @@ const getRandomGradient = (): MantineGradient => {
     color2 = colors[Math.floor(Math.random() * colors.length)];
   }
 
-  return { from: color1 || 'inherit', to: color2 || 'inherit', deg: 45 };
+  return { from: color1 || "inherit", to: color2 || "inherit", deg: 45 };
 };
 
 const Index = () => {
   const earthState = useContext(UIEarthContext);
 
   const [homeState, setHomeState] = useState<IHomeState>({
-    helloColor: { from: 'inherit', to: 'inherit', deg: 45 },
+    helloColor: { from: "inherit", to: "inherit", deg: 45 },
     projects: [],
     hoverIndex: 0,
   });
@@ -126,81 +126,85 @@ const Index = () => {
       helloColor: getRandomGradient(),
       projects: [
         {
-          projectURL: 'https://github.com/efitzkiwi/NT8SupplyDemandDTBot',
-          projectTitle: 'NT8SupplyDemandBot',
-          projectImage: '/ninjatrader.png',
+          projectURL: "https://github.com/efitzkiwi/NT8SupplyDemandDTBot",
+          projectTitle: "NT8SupplyDemandBot",
+          projectImage: "/ninjatrader.jpg",
           badges: [
             {
-              text: 'C#',
-              color: 'lime',
+              text: "C#",
+              color: "lime",
             },
           ],
           description:
-            'Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.',
+            "Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.",
         },
         {
-          projectURL: 'https://bagsbydata.com',
-          projectTitle: 'BagsByData.com',
-          projectImage: '/bagsbydata.png',
+          projectURL: "https://bagsbydata.com",
+          projectTitle: "BagsByData.com",
+          projectImage: "/bagsbydata.jpg",
           badges: [
             {
-              color: 'blue',
-              text: 'Typescript',
+              color: "blue",
+              text: "Typescript",
             },
             {
-              color: 'teal',
-              text: 'React',
+              color: "teal",
+              text: "React",
             },
             {
-              color: 'orange',
-              text: 'Python',
+              color: "orange",
+              text: "Python",
             },
             {
-              color: 'green',
-              text: 'Django',
+              color: "green",
+              text: "Django",
+            },
+            {
+              color: "yellow",
+              text: "PostgreSQL",
             },
           ],
           description:
-            'Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.',
+            "Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.",
         },
         {
           projectURL:
-            'https://github.com/efitzkiwi/Websocket-Data-Bridge-Public',
-          projectTitle: 'Websocket Bridge',
-          projectImage: '/databridge.png',
+            "https://github.com/efitzkiwi/Websocket-Data-Bridge-Public",
+          projectTitle: "Websocket Bridge",
+          projectImage: "/databridge.jpg",
           badges: [
             {
-              text: 'Go',
-              color: 'grape',
+              text: "Go",
+              color: "grape",
             },
             {
-              text: 'API',
-              color: 'red',
+              text: "API",
+              color: "red",
             },
           ],
           description:
-            'Go implementation of a polygon.io stock data API bridge. This bridge allows unlimited clients to connect to a single Polygon.io api connection by routing traffic through a high-speed websocket.',
+            "Go implementation of a polygon.io stock data API bridge. This bridge allows unlimited clients to connect to a single Polygon.io api connection by routing traffic through a high-speed websocket.",
         },
         {
-          projectURL: 'https://github.com/efitzkiwi/portfolio-site',
-          projectTitle: `${window.location.hostname}!`,
-          projectImage: '/earth.png',
+          projectURL: "https://github.com/efitzkiwi/portfolio-site",
+          projectTitle: `My website!`,
+          projectImage: "/earth.jpg",
           badges: [
             {
-              color: 'blue',
-              text: 'Typescript',
+              color: "blue",
+              text: "Typescript",
             },
             {
-              color: 'teal',
-              text: 'React',
+              color: "teal",
+              text: "React",
             },
             {
-              color: 'gray',
-              text: 'Next JS',
+              color: "gray",
+              text: "Next JS",
             },
           ],
           description:
-            'Combined ThreeJS, react, and NextJS to build this beautiful earth simulation!',
+            "Combined ThreeJS, react, and NextJS to build this beautiful earth simulation with a responsive UI!",
         },
       ],
     }));
@@ -232,7 +236,7 @@ const Index = () => {
             }
           >
             HOWDY,
-          </Text>{' '}
+          </Text>{" "}
           I'M EOIN
         </h1>
       </div>
@@ -240,21 +244,21 @@ const Index = () => {
       <div>
         I am a fullstack software developer based outside of DC. Building
         <Anchor href="https://bagsbydata.com/" target="_blank">
-          {' '}
-          BagsByData.com{' '}
+          {" "}
+          BagsByData.com{" "}
         </Anchor>
         while working for a well-known aerospace contractor.
       </div>
 
       <div>Currently practicing Typescript, Python, and Golang</div>
 
-      <h3>Projects</h3>
+      <h2 className="grid mt-8 text-3xl place-items-center">Projects</h2>
       <SimpleGrid
         cols={2}
-        spacing={'lg'}
+        spacing={"lg"}
         breakpoints={[
-          { maxWidth: 766, cols: 2, spacing: 'md' },
-          { maxWidth: 600, cols: 1, spacing: 'sm' },
+          { maxWidth: 766, cols: 2, spacing: "md" },
+          { maxWidth: 600, cols: 1, spacing: "sm" },
         ]}
       >
         {homeState.projects.map((project, index) => {
@@ -264,10 +268,10 @@ const Index = () => {
 
       <div
         style={{
-          display: 'flex',
-          gap: '5px',
-          justifyContent: 'center',
-          marginTop: '50px',
+          display: "flex",
+          gap: "5px",
+          justifyContent: "center",
+          marginTop: "50px",
         }}
       >
         <Button
