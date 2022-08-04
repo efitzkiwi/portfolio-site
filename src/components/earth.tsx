@@ -290,7 +290,7 @@ function EarthBase(props: any) {
         <EarthItselfMax mat={mat} earthRef={earthRef} />
       </Suspense>
 
-      <mesh scale={10} ref={occludeRef} castShadow={true}>
+      <mesh visible scale={10} ref={occludeRef} castShadow={true}>
         <sphereGeometry args={[1, 50, 50]} />
       </mesh>
 

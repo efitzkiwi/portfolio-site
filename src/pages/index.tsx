@@ -165,7 +165,7 @@ const Index = () => {
             },
           ],
           description:
-            "Stock trading bot written in C# based off supply/demand zones. Fully manages one position with a maximum of 2-bracket OCO orders.",
+            "SaaS stock market analytics platform tailored for retail traders. Offers a trade journal, portfolio insights, and alternative stock data. Built using PostgreSQL, React, Django and Go.",
         },
         {
           projectURL:
