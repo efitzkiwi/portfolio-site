@@ -56,7 +56,7 @@ const Main = (props: IMainProps) => {
           </div>
 
           <div className="content py-5 text-xl">{props.children}</div>
-
+          <hr></hr>
           <div className="border-t border-gray-300 py-8 text-center text-sm">
             © Copyright {new Date().getFullYear()} {AppConfig.title}
           </div>

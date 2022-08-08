@@ -308,7 +308,7 @@ function EarthBase(props: any) {
               aspectRatio: "1:1",
             }}
           >
-            <img src="/me.png" alt="me" />
+            <img src="/me.png" alt="me" style={{width:"100%"}} />
           </div>
         </MarkerText>
       </group>

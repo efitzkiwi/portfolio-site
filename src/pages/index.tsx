@@ -181,9 +181,13 @@ const Index = () => {
               text: "API",
               color: "red",
             },
+            {
+              text: "Multithreading",
+              color: "dark",
+            },
           ],
           description:
-            "Go implementation of a polygon.io stock data API bridge. This bridge allows unlimited clients to connect to a single Polygon.io api connection by routing traffic through a high-speed websocket.",
+            "High-performance Go implementation of a polygon.io stock data API bridge. This bridge allows unlimited clients to connect to a single Polygon.io api connection by routing traffic through a high-speed websocket.",
         },
         {
           projectURL: "https://github.com/efitzkiwi/portfolio-site",
@@ -204,7 +208,7 @@ const Index = () => {
             },
           ],
           description:
-            "Combined ThreeJS, react, and NextJS to build this beautiful earth simulation with a responsive UI!",
+            "Combined ThreeJS, react, and NextJS to build this beautiful earth simulation with a responsive UI! Launched via AWS Amplify.",
         },
       ],
     }));
@@ -250,7 +254,8 @@ const Index = () => {
         while working for a well-known aerospace contractor.
       </div>
 
-      <div>Currently practicing Typescript, Python, and Golang</div>
+      <div className="pt-2">Currently practicing Typescript, Python, and Go. ✔️</div>
+      <div>Learning Rust, Kotlin and Kafka. 🧠💡</div>
 
       <h2 className="grid mt-8 text-3xl place-items-center">Projects</h2>
       <SimpleGrid
