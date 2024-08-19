@@ -2,21 +2,12 @@ import type { ColorScheme } from '@mantine/core';
 import { ActionIcon, useMantineColorScheme } from '@mantine/core';
 import { IconMoonStars, IconSun } from '@tabler/icons';
 import type { ReactNode } from 'react';
-import styled from 'styled-components';
 
 import { AppConfig } from '@/utils/AppConfig';
 
 interface WrapperProps {
   theme: ColorScheme;
 }
-
-const Wrapper = styled.div<WrapperProps>`
-  background-color: ${(props) =>
-    props.theme === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)'};
-  border-radius: 5px;
-  margin-top: 8px;
-  padding: 8px;
-`;
 
 type IMainProps = {
   meta: ReactNode;
@@ -30,7 +21,7 @@ const Main = (props: IMainProps) => {
     <div className="absolute px-1 antialiased">
       {props.meta}
       <div className="ml-2 max-w-screen-lg">
-        <Wrapper theme={colorScheme}>
+        <div style={{borderRadius: "5px", marginTop: "8px", padding: "8px", backgroundColor: dark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)'}}>
           {/* <ul className="flex flex-wrap text-xl">
             <li className="mr-6">
             <Link href="/" passHref>
@@ -60,7 +51,7 @@ const Main = (props: IMainProps) => {
           <div className="border-t border-gray-300 py-8 text-center text-sm">
             © Copyright {new Date().getFullYear()} {AppConfig.title}
           </div>
-        </Wrapper>
+        </div>
       </div>
     </div>
   );

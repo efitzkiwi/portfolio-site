@@ -30,14 +30,19 @@ export const UIEarthContextProvider = memo(
 
     return (
       <UIEarthContext.Provider value={earthState}>
-        <LoadingOverlayProvider>
-          <LoadingOverlay />
-          <Suspense fallback={<LoadingOverlayDone />}>
-            <Earth />
-          </Suspense>
-        </LoadingOverlayProvider>
+        <div className='fixed h-screen w-screen top-0 left-0'>
+            <LoadingOverlayProvider>
+              <LoadingOverlay />
+              <Suspense fallback={<LoadingOverlayDone />}>
+                <Earth />
+              </Suspense>
+            </LoadingOverlayProvider>  
+        </div>
+ 
+
 
         {children}
+
       </UIEarthContext.Provider>
     );
   }
