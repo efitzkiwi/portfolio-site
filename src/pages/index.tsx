@@ -164,7 +164,7 @@ const Index = () => {
             helloColor: getRandomGradient(),
             projects: [
                 {
-                    // projectURL: "https://scanr.ai",
+                    projectURL: "https://scanr.ai",
                     projectTitle: "Scanr.ai",
                     projectImage: "/scanrai-charts.png",
                     badges: [
